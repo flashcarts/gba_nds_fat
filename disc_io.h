@@ -11,6 +11,24 @@
 // Note that this will slow down access speed, so only use if you have to.
 // It is also incompatible with DMA
 #define _CF_ALLOW_UNALIGNED
+
+// Device support options, added by www.neoflash.com
+
+#define SUPPORT_NMMC		// comment out this line to remove Neoflash MK2 MMC Card support
+#define SUPPORT_MPCF		// comment out this line to remove GBA Movie Player support
+#define SUPPORT_M3CF		// comment out this line to remove M3 Perfect CF support
+#define SUPPORT_SCCF		// comment out this line to remove Supercard CF support
+//#define SUPPORT_SCSD		// comment out this line to remove Supercard SD support
+#define SUPPORT_FCSR		// comment out this line to remove GBA Flash Cart support
+
+// Disk caching options, added by www.neoflash.com
+// Each additional sector cache uses 512 bytes of memory
+// Disk caching is disabled on GBA to conserve memory
+
+//#define DISC_CACHE				// uncomment this line to enable disc caching
+#define DISC_CACHE_COUNT	256	// maximum number of sectors to cache (512 bytes per sector)
+
+
 //----------------------------------------------------------------------
 
 #if defined _CF_USE_DMA && defined _CF_ALLOW_UNALIGNED
@@ -30,6 +48,12 @@
  #include "gba_types.h"
 #endif
 
+// Disable NDS specific hardware and features if running on a GBA
+#ifndef NDS 
+ #undef SUPPORT_NMMC
+ #undef DISC_CACHE
+#endif
+
 /*
 
 	Interface for host program
@@ -38,7 +62,12 @@
 
 #define BYTE_PER_READ 512
 
-bool disc_Init(void) ;
+/*-----------------------------------------------------------------
+disc_Init
+Detects the inserted hardware and initialises it if necessary
+bool return OUT:  true if a suitable device was found
+-----------------------------------------------------------------*/
+extern bool disc_Init(void) ;
 
 /*-----------------------------------------------------------------
 disc_IsInserted
@@ -93,6 +122,22 @@ u32 return OUT: 0 if no host initialised, else the identifier of
 -----------------------------------------------------------------*/
 extern u32 disc_HostType(void);
 
+/*-----------------------------------------------------------------
+disc_CacheFlush
+Flushes any cache writes to disc
+bool return OUT: true if successful, false if an error occurs
+Added by www.neoflash.com
+-----------------------------------------------------------------*/
+#ifdef DISC_CACHE
+extern bool disc_CacheFlush(void);
+#else
+static inline bool disc_CacheFlush(void)
+{
+	return true;
+}
+#endif // DISC_CACHE
+
+
 /*
 
 	Interface for IO libs
@@ -101,6 +146,8 @@ extern u32 disc_HostType(void);
 
 #define FEATURE_MEDIUM_CANREAD		0x00000001
 #define FEATURE_MEDIUM_CANWRITE		0x00000002
+#define FEATURE_SLOT_GBA			0x00000010
+#define FEATURE_SLOT_NDS			0x00000020
 
 typedef bool (* FN_MEDIUM_STARTUP)(void) ;
 typedef bool (* FN_MEDIUM_ISINSERTED)(void) ;

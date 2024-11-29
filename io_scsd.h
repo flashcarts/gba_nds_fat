@@ -1,8 +1,8 @@
 /*
-	io_m3cf.h 
+	io_scsd.h 
 
-	Hardware Routines for reading a compact flash card
-	using the GBA Movie Player
+	Hardware Routines for reading a Secure Digital card
+	using the Supercard SD
 
 	This software is completely free. No warranty is provided.
 	If you use it, please give me credit and email me about your
@@ -11,15 +11,15 @@
 	See gba_nds_fat.txt for help and license details.
 */
 
-#ifndef IO_M3CF_H
-#define IO_M3CF_H
+#ifndef IO_SCSD_H
+#define IO_SCSD_H
 
-// 'M3CF'
-#define DEVICE_TYPE_M3CF 0x4643334D
+// 'SCSD'
+#define DEVICE_TYPE_SCSD 0x44534353
 
 #include "disc_io.h"
 
 // export interface
-extern LPIO_INTERFACE M3CF_GetInterface(void) ;
+extern LPIO_INTERFACE SCSD_GetInterface(void) ;
 
-#endif	// define IO_M3CF_H
+#endif	// define IO_SCSD_H

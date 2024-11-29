@@ -2,7 +2,7 @@
 	io_sccf.h 
 
 	Hardware Routines for reading a compact flash card
-	using the GBA Movie Player
+	using the Supercard CF
 
 	This software is completely free. No warranty is provided.
 	If you use it, please give me credit and email me about your
@@ -13,6 +13,9 @@
 
 #ifndef IO_SCCF_H
 #define IO_SCCF_H
+
+// 'SCCF'
+#define DEVICE_TYPE_SCCF 0x46434353
 
 #include "disc_io.h"
 

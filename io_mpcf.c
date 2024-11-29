@@ -19,6 +19,8 @@
 
 #include "io_mpcf.h"
 
+#ifdef SUPPORT_MPCF
+
 //---------------------------------------------------------------
 // DMA
 #ifdef _CF_USE_DMA
@@ -75,7 +77,7 @@ bool MPCF_IsInserted (void)
 {
 	// Change register, then check if value did change
 	MP_REG_STS = CF_STS_INSERTED;
-	return (MP_REG_STS == CF_STS_INSERTED);
+	return ((MP_REG_STS & 0xff) == CF_STS_INSERTED);
 }
 
 
@@ -164,7 +166,7 @@ bool MPCF_ReadSectors (u32 sector, u8 numSecs, void* buffer)
 	{
 		// Wait until card is ready for reading
 		i = 0;
-		while ((MP_REG_STS != CF_STS_READY) && (i < CARD_TIMEOUT))
+		while (((MP_REG_STS & 0xff)!= CF_STS_READY) && (i < CARD_TIMEOUT))
 		{
 			i++;
 		}
@@ -264,7 +266,7 @@ bool MPCF_WriteSectors (u32 sector, u8 numSecs, void* buffer)
 	{
 		// Wait until card is ready for writing
 		i = 0;
-		while ((MP_REG_STS != CF_STS_READY) && (i < CARD_TIMEOUT))
+		while (((MP_REG_STS & 0xff) != CF_STS_READY) && (i < CARD_TIMEOUT))
 		{
 			i++;
 		}
@@ -334,8 +336,8 @@ bool MPCF_StartUp(void)
 the actual interface structure
 -----------------------------------------------------------------*/
 IO_INTERFACE io_mpcf = {
-	0x4643504D,	// 'MPCF'
-	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	DEVICE_TYPE_MPCF,
+	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA,
 	(FN_MEDIUM_STARTUP)&MPCF_StartUp,
 	(FN_MEDIUM_ISINSERTED)&MPCF_IsInserted,
 	(FN_MEDIUM_READSECTORS)&MPCF_ReadSectors,
@@ -351,3 +353,5 @@ returns the interface structure to host
 LPIO_INTERFACE MPCF_GetInterface(void) {
 	return &io_mpcf ;
 } ;
+
+#endif // SUPPORT_MPCF

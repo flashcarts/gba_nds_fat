@@ -20,6 +20,25 @@
 #ifndef _GBA_NDS_FAT_INCLUDED
 #define _GBA_NDS_FAT_INCLUDED
 
+//---------------------------------------------------------------
+// Customisable features
+
+// Maximum number of files open at once
+// Increase this to open more files, decrease to save memory
+#define MAX_FILES_OPEN	4
+
+// Allow file writing
+// Disable this to remove file writing support
+#define CAN_WRITE_TO_DISC
+
+// Allow file time functions
+// This adds ~ 14KB to the compiled size
+// Uncomment to enable
+// #define FILE_TIME_SUPPORT
+
+//---------------------------------------------------------------
+// Platform specific includes
+
 // When compiling for NDS, make sure NDS is defined
 // If using this on the ARM7, you will need to explicitly define NDS
 #ifdef ARM9
@@ -34,6 +53,10 @@
  #include "gba_types.h"
 #endif
 
+#ifdef FILE_TIME_SUPPORT
+ #include <time.h>
+#endif
+
 //---------------------------------------------------------------
 #ifdef __cplusplus
 extern "C" {
@@ -43,8 +66,6 @@ extern "C" {
 //---------------------------------------------------------------
 // Important constants
 
-// Increase this to open more files, decrease to save memory
-#define MAX_FILES_OPEN	4	// Maximum number of files open at once
 
 #define MAX_FILENAME_LENGTH 256	// Maximum LFN length. Don't change this one
 
@@ -58,6 +79,9 @@ extern "C" {
 
 // Directory Constants
 	typedef enum {FT_NONE, FT_FILE, FT_DIR} FILE_TYPE;
+
+// Filesystem type
+	typedef enum {FS_UNKNOWN, FS_FAT12, FS_FAT16, FS_FAT32} FS_TYPE;
 
 // Open file information structure
 typedef struct
@@ -135,6 +159,22 @@ u32 return OUT: the file start cluster
 -----------------------------------------------------------------*/
 u32 FAT_GetFileCluster (void);
 
+#ifdef FILE_TIME_SUPPORT
+/*-----------------------------------------------------------------
+FAT_GetFileCreationTime
+Get the creation time of the last file found or openned.
+time_t return OUT: the file's creation time
+-----------------------------------------------------------------*/
+time_t FAT_GetFileCreationTime (void);
+
+/*-----------------------------------------------------------------
+FAT_GetFileLastWriteTime
+Get the creation time of the last file found or openned.
+time_t return OUT: the file's creation time
+-----------------------------------------------------------------*/
+time_t FAT_GetFileLastWriteTime (void);
+#endif
+
 /*-----------------------------------------------------------------
 FAT_FindNextFile
 Gets the name of the next directory entry
@@ -183,6 +223,18 @@ FILE_TYPE return: OUT returns FT_NONE if there is now file with
 	that name, FT_FILE if it is a file and FT_DIR if it is a directory
 -----------------------------------------------------------------*/
 FILE_TYPE FAT_FileExists (const char* filename);
+
+/*-----------------------------------------------------------------
+FAT_GetFileSystemType
+FS_TYPE return: OUT returns the current file system type
+-----------------------------------------------------------------*/
+FS_TYPE FAT_GetFileSystemType (void);
+
+/*-----------------------------------------------------------------
+FAT_GetFileSystemTotalSize
+u32 return: OUT returns the total disk space (used + free)
+-----------------------------------------------------------------*/
+u32 FAT_GetFileSystemTotalSize (void);
 
 /*-----------------------------------------------------------------
 FAT_chdir
@@ -251,6 +303,7 @@ u32 OUT: returns the actual number of bytes read
 -----------------------------------------------------------------*/
 u32 FAT_fread (void* buffer, u32 size, u32 count, FAT_FILE* file);
 
+#ifdef CAN_WRITE_TO_DISC
 /*-----------------------------------------------------------------
 FAT_fwrite(buffer, size, count, file)
 Writes size * count bytes into file from buffer, starting
@@ -265,6 +318,7 @@ FAT_FILE* file IN: Handle of an open file
 u32 OUT: returns the actual number of bytes written
 -----------------------------------------------------------------*/
 u32 FAT_fwrite (const void* buffer, u32 size, u32 count, FAT_FILE* file);
+#endif
 
 /*-----------------------------------------------------------------
 FAT_feof(file)
@@ -274,6 +328,7 @@ bool return OUT: true if EOF, false if not
 -----------------------------------------------------------------*/
 bool FAT_feof(FAT_FILE* file);
 
+#ifdef CAN_WRITE_TO_DISC
 /*-----------------------------------------------------------------
 FAT_remove (path)
 Deletes the file or empty directory sepecified in path
@@ -281,7 +336,9 @@ const char* path IN: Path of item to delete
 int return OUT: zero if successful, non-zero if not
 -----------------------------------------------------------------*/
 int FAT_remove (const char* path);
+#endif
 
+#ifdef CAN_WRITE_TO_DISC
 /*-----------------------------------------------------------------
 FAT_mkdir (path)
 Makes a new directory, so long as no other directory or file has 
@@ -290,6 +347,7 @@ const char* path IN: Path and filename of directory to make
 int return OUT: zero if successful, non-zero if not
 -----------------------------------------------------------------*/
 int FAT_mkdir (const char* path);
+#endif
 
 /*-----------------------------------------------------------------
 FAT_fgetc (handle)
@@ -299,6 +357,7 @@ bool return OUT: character if successful, EOF if not
 -----------------------------------------------------------------*/
 char FAT_fgetc (FAT_FILE* file);
 
+#ifdef CAN_WRITE_TO_DISC
 /*-----------------------------------------------------------------
 FAT_fputc (character, handle)
 Writes the given character into the file
@@ -307,6 +366,7 @@ FAT_FILE* handle IN: Handle of open file
 bool return OUT: character if successful, EOF if not
 -----------------------------------------------------------------*/
 char FAT_fputc (char c, FAT_FILE* file);
+#endif
 
 /*-----------------------------------------------------------------
 FAT_fgets (char *tgtBuffer, int num, FAT_FILE* file)
@@ -329,6 +389,7 @@ bool return OUT: character if successful, EOF if not
 -------------------------------------------------------------------*/
 char *FAT_fgets(char *tgtBuffer, int num, FAT_FILE* file) ;
 
+#ifdef CAN_WRITE_TO_DISC
 /*-----------------------------------------------------------------
 FAT_fputs (const char *string, FAT_FILE* file)
 Writes string to file, excluding end of string character
@@ -343,6 +404,7 @@ bool return OUT: number of characters written if successful,
 	* writtenBytes is now u32 instead of int
 -------------------------------------------------------------------*/
 int FAT_fputs (const char *string, FAT_FILE* file);
+#endif
 
 //------------------------------------------------------------------
 #ifdef __cplusplus

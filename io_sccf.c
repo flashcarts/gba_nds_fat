@@ -19,6 +19,12 @@
 
 #include "io_sccf.h"
 
+#ifdef SUPPORT_SCCF
+
+#ifndef SUPPORT_MPCF
+ #error Supercard CF support requires GBAMP CF support
+#endif // SUPPORT_MPCF
+
 /*-----------------------------------------------------------------
 Since all CF addresses and commands are the same for the GBAMP,
 simply use it's functions instead.
@@ -63,8 +69,8 @@ bool SCCF_StartUp(void) {
 
 
 IO_INTERFACE io_sccf = {
-	0x46434353,	// 'SCCF'
-	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	DEVICE_TYPE_SCCF,
+	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA,
 	(FN_MEDIUM_STARTUP)&SCCF_StartUp,
 	(FN_MEDIUM_ISINSERTED)&MPCF_IsInserted,
 	(FN_MEDIUM_READSECTORS)&MPCF_ReadSectors,
@@ -77,3 +83,5 @@ IO_INTERFACE io_sccf = {
 LPIO_INTERFACE SCCF_GetInterface(void) {
 	return &io_sccf ;
 } ;
+
+#endif // SUPPORT_SCCF

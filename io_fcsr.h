@@ -13,6 +13,9 @@
 #ifndef IO_FCSR_H
 #define IO_FCSR_H
 
+// 'FCSR'
+#define DEVICE_TYPE_FCSR 0x52534346
+
 #include "disc_io.h"
 
 // export interface

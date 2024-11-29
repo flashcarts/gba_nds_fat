@@ -19,7 +19,9 @@
 
 
 #include "io_fcsr.h"
-#include <String.h>
+
+#ifdef SUPPORT_FCSR
+#include <string.h>
 
 //---------------------------------------------------------------
 // DMA
@@ -306,8 +308,8 @@ bool FCSR_StartUp(void)
 the actual interface structure
 -----------------------------------------------------------------*/
 IO_INTERFACE io_fcsr = {
-	0x52534346,	// 'FCSR'
-	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	DEVICE_TYPE_FCSR,	// 'FCSR'
+	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA,
 	(FN_MEDIUM_STARTUP)&FCSR_StartUp,
 	(FN_MEDIUM_ISINSERTED)&FCSR_IsInserted,
 	(FN_MEDIUM_READSECTORS)&FCSR_ReadSectors,
@@ -324,3 +326,4 @@ LPIO_INTERFACE FCSR_GetInterface(void) {
 	return &io_fcsr ;
 } ;
 
+#endif // SUPPORT_FCSR

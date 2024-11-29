@@ -19,6 +19,8 @@
 
 #include "io_m3cf.h"
 
+#ifdef SUPPORT_M3CF
+
 //---------------------------------------------------------------
 // DMA
 #ifdef _CF_USE_DMA
@@ -75,7 +77,7 @@ bool M3CF_IsInserted (void)
 {
 	// Change register, then check if value did change
 	M3_REG_STS = CF_STS_INSERTED;
-	return (M3_REG_STS == CF_STS_INSERTED);
+	return ((M3_REG_STS & 0xff) == CF_STS_INSERTED);
 }
 
 
@@ -164,7 +166,7 @@ bool M3CF_ReadSectors (u32 sector, u8 numSecs, void* buffer)
 	{
 		// Wait until card is ready for reading
 		i = 0;
-		while ((M3_REG_STS != CF_STS_READY) && (i < CARD_TIMEOUT))
+		while (((M3_REG_STS & 0xff) != CF_STS_READY) && (i < CARD_TIMEOUT))
 		{
 			i++;
 		}
@@ -265,7 +267,7 @@ bool M3CF_WriteSectors (u32 sector, u8 numSecs, void* buffer)
 	{
 		// Wait until card is ready for writing
 		i = 0;
-		while ((M3_REG_STS != CF_STS_READY) && (i < CARD_TIMEOUT))
+		while (((M3_REG_STS & 0xff) != CF_STS_READY) && (i < CARD_TIMEOUT))
 		{
 			i++;
 		}
@@ -347,8 +349,8 @@ bool M3CF_StartUp(void) {
 
 
 IO_INTERFACE io_m3cf = {
-	0x4643334D,	// 'M3CF'
-	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
+	DEVICE_TYPE_M3CF,
+	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_SLOT_GBA,
 	(FN_MEDIUM_STARTUP)&M3CF_StartUp,
 	(FN_MEDIUM_ISINSERTED)&M3CF_IsInserted,
 	(FN_MEDIUM_READSECTORS)&M3CF_ReadSectors,
@@ -361,3 +363,5 @@ IO_INTERFACE io_m3cf = {
 LPIO_INTERFACE M3CF_GetInterface(void) {
 	return &io_m3cf ;
 } ;
+
+#endif // SUPPORT_M3CF

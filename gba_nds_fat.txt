@@ -33,7 +33,7 @@ You MUST call FAT_InitFiles() before using any other FAT function. If you do not
 
 Paths are separated with forward slashes ( / ). / is the root of the card. Filenames can be in short or long format. Only ASCII is supported for long filenames. Extended characters are case sensitive, eg ä and Ä are treated as two different characters, whereas a and A are both treated as A.
 
-Call FAT_CWD to change directory, specifying either relative or absolute paths. Paths do not have to be terminated with a slash. Any terminating slashes are ignored.
+Call FAT_chdir to change directory, specifying either relative or absolute paths. Paths do not have to be terminated with a slash. Any terminating slashes are ignored.
 
 Call FAT_FindFirstFile(char* filename) to get the name of the first file or directory in the current directory. A return value of 1 indicates a file was found, 2 indicates a directory was found and 0 indicates nothing was found.
 
@@ -46,7 +46,7 @@ Call FAT_GetFileSize to get the size of the last file found or openned.
 Call FAT_GetFileCluster to get the start cluster of the last file found or openned.
 
 FAT_fopen, FAT_fclose, FAT_fseek, FAT_ftell, FAT_fread and FAT_fwrite work the same as normal fopen, fclose etc. However, files can only be openned in binary mode. Text mode is unsupported. 
-From this version onwards, files are refered to using FAT_FILE* handle, where handle is the handle of the file. If you have used previous versions, change the int handle to FAT_FILE* handle when refering to files.
+Files are refered to using FAT_FILE* handle, where handle is the handle of the file. If you have used previous versions, change the int handle to FAT_FILE* handle when refering to files.
 When specifying a mode to FAT_fopen, only the strings "r", "r+", "w", "w+", "a" and "a+" will work. Anything else is rejected. 
 Make sure you call FAT_fclose when you are finished with a file, especially after writing. Otherwise the file length will not be updated.
 
@@ -66,6 +66,8 @@ MightyMax has helped with fseek.
 Joat provided system time and date functions.
 wwcube provided example patches for unaligned buffer support.
 MightyMax wrote FAT_fgets and FAT_fputs.
+www.neoflash.com provided the routines to access the MK2 / MK3. They also added sector caching.
+0xtob fixed a bug in AddDirEntry that corrupted short filename extensions
 
 ________________________________________________________________
 History:
@@ -210,8 +212,23 @@ History:
 2006-01-04
  * Fixed FAT_fwrite when writing in cluster aligned chunks
 
+2006-02-09
+ * Fixed file and directory names starting with a dot ("."), or containing more than one dot
+ * Added Neoflash MK2 / MK3 support, thanks to www.neoflash.com
+ * Modified CF access routines to mask of the high byte of the status register, hopefully improving compatibility
+ * Added disc caching, thanks to www.neoflash.com . It can only be enabled on the DS (not GBA) since it will consume 128KB of memory on the default setting. It is advisable to call FAT_FreeFiles() before shut down if caching is enabled, to flush any writes to disc
+ * Added Supercard SD test code. It unfortunately doesn't work, and is disabled by default
+ * Added FAT total size and type functions
+ * Added file creation and modification functions. Disabled by default, see gba_nds_fat.h for more info
+ * Fixed AddDirEntry bugs:
+	* should no longer corrupt a directory when adding a new file
+	* no longer puts garbage into a short file name's extension, thanks to 0xtob
+	* long file names with less than 12 characters now work, thanks to DragonMinded for pointing it out
 
+ 
 TODO:
- * Add Supercard SD support
-
+ * Fix Supercard SD support
+ * Add M3 SD support
+ 
+ 
 

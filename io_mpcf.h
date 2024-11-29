@@ -14,6 +14,9 @@
 #ifndef IO_MPCF_H
 #define IO_MPCF_H
 
+// 'MPCF'
+#define DEVICE_TYPE_MPCF 0x4643504D
+
 #include "disc_io.h"
 
 // export interface
